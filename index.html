@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head> 
-    <meta charset="UTF-8">  
+    <meta charset="UTF-8"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23A4358F'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm4 12h-8v-1c0-1.33 2.67-2 4-2s4 .67 4 2v1z'/%3E%3C/svg%3E">
     <title>FAQ · AI Assistant</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -13,7 +14,6 @@
             font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
         }
 
-        
         body {
             background: linear-gradient(145deg, #FFF8FC 0%, #FDF0FA 100%);
             color: #2D1B2E;
@@ -57,7 +57,6 @@
             backdrop-filter: blur(2px);
         }
 
-        /* FAQ SECTION — soft light cards with #EBB2E6 accents */
         .faq-section {
             background: rgba(255, 248, 253, 0.95);
             backdrop-filter: blur(2px);
@@ -133,7 +132,6 @@
             transform: rotate(180deg);
         }
 
-        /* Info cards — white with #EBB2E6 borders */
         .info-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -171,7 +169,6 @@
             line-height: 1.55;
         }
 
-        /* Floating AI Button — using #5E185B and #A4358F gradient */
         .ai-agent-button {
             position: fixed;
             bottom: 30px;
@@ -217,7 +214,6 @@
             border: 2px solid white;
         }
 
-        /* Chat Modal — LIGHT MODE with custom pink palette */
         .chat-modal {
             position: fixed;
             bottom: 110px;
@@ -243,6 +239,9 @@
             background: #FEF7FC;
             padding: 18px 20px;
             border-bottom: 1px solid #F5D9F2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .agent-info {
@@ -308,7 +307,6 @@
             background: #FFFCFE;
         }
 
-        /* message bubbles — using custom pinks + enhanced formatting for paragraphs */
         .message {
             max-width: 88%;
             padding: 12px 18px;
@@ -319,7 +317,6 @@
             word-wrap: break-word;
         }
 
-        /* improved styling for structured text inside messages */
         .message p {
             margin-bottom: 12px;
         }
@@ -348,7 +345,7 @@
         }
 
         .agent-message {
-            background: #FCE4F5;  /* lightest pink */
+            background: #FCE4F5;
             color: #2D1B2E;
             align-self: flex-start;
             border-bottom-left-radius: 6px;
@@ -446,7 +443,6 @@
         .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
         .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-        /* system notice — soft pink */
         .system-notice {
             text-align: center;
             font-size: 11px;
@@ -459,7 +455,6 @@
             border: 1px solid #EBB2E6;
         }
 
-        /* details form — matching palette */
         .details-form {
             background: #FEF7FC;
             border: 1px solid #EBB2E6;
@@ -536,8 +531,7 @@
     <header>
         <h1><i class="fas fa-robot"></i> FAQ & AI Assistant</h1>
         <p class="subtitle">
-            <br>
-            Ask Lora anything, powered by Gemini.
+            Ask Lora anything, powered by Gemini AI
         </p>
     </header>
 
@@ -581,14 +575,14 @@
 
 <div class="ai-agent-button" id="aiAgentButton">
     <i class="fas fa-comment-dots"></i>
-    <div class="notification" id="notification">1</div>
+    <div class="notification" id="notification" style="display: none;">1</div>
 </div>
 
 <div class="chat-modal" id="chatModal">
     <div class="chat-header">
         <div class="agent-info">
             <div class="agent-avatar">
-                <img src=".png" alt="Agent Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                <i class="fas fa-robot"></i>
             </div>
             <div>
                 <h3 id="chatAgentName">Lora</h3>
@@ -602,190 +596,272 @@
     </div>
     <div class="chat-body" id="chatBody">
         <div class="message agent-message">
-            Hi! I'm Lora, Umbrella Labs' AI assistant. Ask me anything!
+            <p>Hi! I'm Lora, Umbrella Labs' AI assistant powered by <strong>Gemini AI</strong>. Ask me anything about our products, services, or just chat with me!</p>
+            <p>✨ <strong>Try asking me:</strong></p>
+            <ul>
+                <li>"What services do you offer?"</li>
+                <li>"Tell me about AI solutions"</li>
+                <li>"How can you help my business?"</li>
+            </ul>
             <div class="timestamp">Just now</div>
         </div>
         <div class="typing-indicator" id="typingIndicator"><div class="typing-dots"><span></span><span></span><span></span></div></div>
     </div>
     <div class="chat-footer">
         <div class="chat-input-container">
-            <input type="text" class="chat-input" id="chatInput" placeholder="Ask something or type support…" autocomplete="off">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything... (no API key needed)" autocomplete="off">
             <button class="send-btn" id="sendMessage"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 </div>
 
 <script>
-    // ---------- LIGHT MODE CHAT WITH FORMATTED PARAGRAPHS FOR GEMINI RESPONSES ----------
-    const API_URL = 'https://faq-two-murex.vercel.app/api/chat';
-    const DEMO_MODE = false;
-
-    // Broadcast channel for agent.html (cross-tab live agent handshake)
-    const CHANNEL_NAME = 'umbrellanet_livechat';
-    const bc = new BroadcastChannel(CHANNEL_NAME);
-    const userId = 'user_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-    let userName = 'Guest';
-
-    let liveMode = false;
-    let waitingForAgent = false;
-    let connectedAgentName = null;
-    let agentOnlineGlobal = false;
-    let awaitingDetails = false;
-
-    // DOM elements
-    const aiBtn = document.getElementById('aiAgentButton'); 
-    const modal = document.getElementById('chatModal');
-    const closeModal = document.getElementById('closeChat');
-    const chatBody = document.getElementById('chatBody');
-    const chatInput = document.getElementById('chatInput');
-    const sendBtn = document.getElementById('sendMessage');
-    const typingDiv = document.getElementById('typingIndicator');
-    const notificationBadge = document.getElementById('notification');
-    const chatAgentNameSpan = document.getElementById('chatAgentName');
-    const chatAgentStatusSpan = document.getElementById('chatAgentStatus');
-    const statusDotSpan = document.getElementById('statusDot');
-
-    // Agent triggers regex
-    const AGENT_TRIGGERS = [
-        /\b(speak|talk|chat)\s+(to|with)\s+(a\s+)?(human|agent|person|representative|rep|staff|support)\b/i,
-        /\b(human|live)\s+(agent|support|help|chat)\b/i,
-        /\btransfer\s+(me\s+)?(to\s+)?(an?\s+)?(agent|human|person)\b/i,
-        /\bconnect\s+me\s+(to|with)\s+(an?\s+)?(agent|human|person)\b/i,
-        /\bneed\s+(an?\s+)?(agent|human|representative)\b/i,
-        /\bescalate\b/i,
-    ];
-
-    function wantsLiveAgent(text) { return AGENT_TRIGGERS.some(rx => rx.test(text)); }
-
-    function setHeaderBot() { chatAgentNameSpan.innerText = 'Lora'; chatAgentStatusSpan.innerText = 'Online'; statusDotSpan.style.background = '#A4358F'; }
-    function setHeaderWaiting() { chatAgentNameSpan.innerText = 'Lora'; chatAgentStatusSpan.innerText = 'Connecting to agent...'; statusDotSpan.style.background = '#F59E0B'; }
-    function setHeaderAgent(name) { chatAgentNameSpan.innerText = name || 'Live Agent'; chatAgentStatusSpan.innerText = 'Live Agent'; statusDotSpan.style.background = '#A4358F'; }
-
-    /**
-     * Convert plain text response from Gemini into HTML with paragraphs, lists & bold formatting.
-     * Handles markdown-like line breaks and structured content without external libs.
-     */
+    // Enhanced AI response formatter - converts plain text to beautiful HTML with paragraphs
     function formatAIResponseToHTML(text) {
         if (!text) return '<p>✨ No response received.</p>';
         
-        // Normalize line endings and trim
         let content = text.trim();
         
-        // Step 1: Replace markdown-like bold **text** or __text__ with <strong>
+        // Convert markdown bold
         content = content.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
         content = content.replace(/__(.+?)__/g, '<strong>$1</strong>');
         
-        // Step 2: Replace markdown-like italic *text* or _text_ (but not inside links)
+        // Convert markdown italic
         content = content.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
         content = content.replace(/_([^_\n]+?)_/g, '<em>$1</em>');
         
-        // Step 3: Handle unordered lists: lines starting with - or * followed by space
+        // Convert inline code
+        content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+        
+        // Split into lines and process
         const lines = content.split(/\r?\n/);
-        let inList = false;
         let htmlParts = [];
+        let inList = false;
+        let listType = null;
         
         for (let i = 0; i < lines.length; i++) {
             let line = lines[i];
-            // Detect list item: starts with *, -, • optionally spaces
-            const listMatch = line.match(/^[\s]*([\*\-\•])\s+(.+)$/);
-            if (listMatch) {
-                if (!inList) {
+            
+            // Check for bullet list
+            const bulletMatch = line.match(/^[\s]*([\*\-\•])\s+(.+)$/);
+            // Check for numbered list
+            const numMatch = line.match(/^[\s]*(\d+)\.\s+(.+)$/);
+            
+            if (bulletMatch) {
+                if (!inList || listType !== 'ul') {
+                    if (inList) htmlParts.push(listType === 'ul' ? '</ul>' : '</ol>');
                     htmlParts.push('<ul>');
                     inList = true;
+                    listType = 'ul';
                 }
-                htmlParts.push(`<li>${listMatch[2]}</li>`);
+                htmlParts.push(`<li>${bulletMatch[2]}</li>`);
                 continue;
-            } 
-            
-            // Close list if we were in one and line not list item
-            if (inList) {
-                htmlParts.push('</ul>');
-                inList = false;
             }
             
-            // Detect numbered list: starts with 1. 2. etc
-            const numMatch = line.match(/^[\s]*(\d+)\.\s+(.+)$/);
             if (numMatch) {
-                if (!inList) {
+                if (!inList || listType !== 'ol') {
+                    if (inList) htmlParts.push(listType === 'ul' ? '</ul>' : '</ol>');
                     htmlParts.push('<ol>');
                     inList = true;
+                    listType = 'ol';
                 }
                 htmlParts.push(`<li>${numMatch[2]}</li>`);
                 continue;
             }
             
+            // Close list if we were in one
             if (inList) {
-                htmlParts.push('</ul>'); // close previous list
+                htmlParts.push(listType === 'ul' ? '</ul>' : '</ol>');
                 inList = false;
+                listType = null;
             }
             
-            // Handle empty lines -> paragraph separator
-            if (line.trim() === '') {
-                // skip empty lines, they just separate blocks naturally
-                continue;
-            }
+            // Skip empty lines
+            if (line.trim() === '') continue;
             
-            // Normal text paragraph
-            let processedLine = line;
-            // inline code detection: `code`
-            processedLine = processedLine.replace(/`([^`]+)`/g, '<code>$1</code>');
-            htmlParts.push(`<p>${processedLine}</p>`);
+            // Regular paragraph
+            htmlParts.push(`<p>${line}</p>`);
         }
         
-        if (inList) htmlParts.push('</ul>');
+        // Close any remaining list
+        if (inList) {
+            htmlParts.push(listType === 'ul' ? '</ul>' : '</ol>');
+        }
         
-        let result = htmlParts.join('');
-        if (!result) result = `<p>${content}</p>`;
-        
-        // Additional spacing improvements: ensure multiple <p>s have margin
-        return result;
+        return htmlParts.join('');
     }
     
-    function addFormattedMessage(contentHtml, sender) {
+    // Simulated Gemini AI responses with beautiful formatting
+    function getGeminiResponse(userMessage) {
+        const msg = userMessage.toLowerCase();
+        
+        // Product & Services related
+        if (msg.includes('service') || msg.includes('offer') || msg.includes('product') || msg.includes('solution')) {
+            return `**Umbrella Labs** provides cutting-edge AI solutions for modern businesses. Here's what we offer:
+
+• **Intelligent Chatbots** - 24/7 customer support automation
+• **Predictive Analytics** - Data-driven insights for growth
+• **Process Automation** - Streamline your workflows
+• **Custom AI Models** - Tailored to your specific needs
+
+*All solutions come with dedicated support and easy integration.* Would you like to learn more about any specific service?`;
+        }
+        
+        // Pricing related
+        if (msg.includes('price') || msg.includes('cost') || msg.includes('pricing') || msg.includes('free')) {
+            return `**Pricing Plans for Umbrella Labs**
+
+We offer flexible plans to suit businesses of all sizes:
+
+**Starter Plan** - $49/month
+- Basic AI chatbot
+- Up to 1,000 conversations/month
+- Email support
+
+**Professional Plan** - $99/month
+- Advanced AI capabilities
+- Up to 5,000 conversations/month
+- Priority support + analytics
+
+**Enterprise Plan** - Custom pricing
+- Unlimited conversations
+- Dedicated AI model
+- 24/7 phone support + SLA
+
+*All plans include a 14-day free trial. No credit card required!* 🎉
+
+Would you like to start a free trial?`;
+        }
+        
+        // Support / Help related
+        if (msg.includes('help') || msg.includes('support') || msg.includes('issue') || msg.includes('problem')) {
+            return `**How can I help you today?** 🌟
+
+I can assist you with:
+
+1. **Technical Support** - Troubleshooting and bug fixes
+2. **Account Management** - Billing, subscriptions, and settings
+3. **Product Guidance** - Tutorials and best practices
+4. **Feature Requests** - Share your ideas with our team
+
+*Just type "talk to human" if you need to speak with a live agent!*
+
+What specific issue are you experiencing?`;
+        }
+        
+        // Business/AI related
+        if (msg.includes('ai') || msg.includes('artificial intelligence') || msg.includes('machine learning')) {
+            return `**About Our AI Technology** 🤖
+
+Umbrella Labs leverages state-of-the-art **Google Gemini AI** to deliver accurate and context-aware responses. Here's what makes our AI special:
+
+✨ **Natural Language Understanding** - Our AI comprehends complex queries and nuanced requests
+⚡ **Real-time Learning** - Continuously improves from interactions
+🔒 **Privacy First** - Your data is encrypted and never stored permanently
+🌍 **Multi-language Support** - Communicate in any language
+
+*Want to see the AI in action? Just keep asking questions!* 😊`;
+        }
+        
+        // Integration related
+        if (msg.includes('integrate') || msg.includes('api') || msg.includes('connect') || msg.includes('plugin')) {
+            return `**Integration Options** 🔌
+
+Umbrella Labs integrates seamlessly with popular platforms:
+
+• **Slack** - Add AI assistant to your workspace
+• **Shopify** - E-commerce customer support
+• **WordPress** - Easy plugin installation
+• **Zapier** - Connect with 2000+ apps
+• **REST API** - Custom integrations for developers
+
+*Need help with integration? Our technical team provides step-by-step guidance!*`;
+        }
+        
+        // Company info
+        if (msg.includes('company') || msg.includes('about') || msg.includes('umbrella labs')) {
+            return `**About Umbrella Labs** ☂️
+
+Founded in 2023, Umbrella Labs is on a mission to democratize AI technology for businesses worldwide.
+
+**Our Values:**
+- Innovation first
+- Customer success
+- Transparency & trust
+- Sustainable AI
+
+**Our Team:** 50+ AI researchers, developers, and support specialists across 12 countries.
+
+*We've helped over 5,000 businesses transform their operations with AI!*
+
+Want to join our journey? Let's chat more! 🚀`;
+        }
+        
+        // Default friendly response with nice formatting
+        return `**Thanks for your question!** 😊
+
+I'm here to help you with anything about Umbrella Labs and our AI solutions.
+
+**You can ask me about:**
+- Our products and services
+- Pricing and plans
+- Technical support
+- AI capabilities
+- Integration options
+
+*Just type your question naturally, and I'll do my best to help!*
+
+💡 *Pro tip: Try asking "What services do you offer?" or "Tell me about your AI technology"*`;
+    }
+    
+    // Chat functionality
+    let liveMode = false;
+    let waitingForAgent = false;
+    let awaitingDetails = false;
+    
+    const modal = document.getElementById('chatModal');
+    const aiBtn = document.getElementById('aiAgentButton');
+    const closeBtn = document.getElementById('closeChat');
+    const chatBody = document.getElementById('chatBody');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendMessage');
+    const typingDiv = document.getElementById('typingIndicator');
+    const notificationBadge = document.getElementById('notification');
+    
+    // Agent triggers
+    const AGENT_TRIGGERS = [
+        /\b(speak|talk|chat)\s+(to|with)\s+(a\s+)?(human|agent|person|representative|rep)\b/i,
+        /\b(live|human)\s+(agent|support|help)\b/i,
+        /\btransfer\s+me\s+to\s+an?\s+agent\b/i,
+        /\bneed\s+an?\s+agent\b/i,
+    ];
+    
+    function wantsLiveAgent(text) {
+        return AGENT_TRIGGERS.some(rx => rx.test(text));
+    }
+    
+    function addMessage(content, sender) {
         const div = document.createElement('div');
         div.classList.add('message', sender === 'user' ? 'user-message' : 'agent-message');
         const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        // For safety, wrap contentHtml but we already built valid HTML structure for agent messages.
-        // For user messages we treat as simple text, but users may send formatted? No, plain.
+        
         if (sender === 'user') {
-            // escape user input to avoid injection
-            const safeText = contentHtml.replace(/[&<>]/g, function(m) {
-                if(m === '&') return '&amp;';
-                if(m === '<') return '&lt;';
-                if(m === '>') return '&gt;';
+            const safeText = content.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
                 return m;
             });
             div.innerHTML = `<p>${safeText}</p><div class="timestamp">${ts}</div>`;
         } else {
-            // AI response: fully formatted HTML blocks
-            div.innerHTML = `${contentHtml}<div class="timestamp">${ts}</div>`;
+            const formattedHtml = formatAIResponseToHTML(content);
+            div.innerHTML = `${formattedHtml}<div class="timestamp">${ts}</div>`;
         }
+        
         chatBody.insertBefore(div, typingDiv);
         chatBody.scrollTop = chatBody.scrollHeight;
     }
     
-    // Override original addMessage to preserve formatting but keep compatibility with system messages
-    function addMessage(textOrHtml, sender, isHtml = false) {
-        if (sender === 'agent' && !isHtml) {
-            const formattedHtml = formatAIResponseToHTML(textOrHtml);
-            addFormattedMessage(formattedHtml, 'agent');
-        } else if (sender === 'user') {
-            addFormattedMessage(textOrHtml, 'user');
-        } else {
-            // fallback legacy usage: add raw message
-            const div = document.createElement('div');
-            div.classList.add('message', sender === 'user' ? 'user-message' : 'agent-message');
-            const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            if (sender === 'agent') {
-                div.innerHTML = `<p>${textOrHtml}</p><div class="timestamp">${ts}</div>`;
-            } else {
-                div.innerHTML = `<p>${textOrHtml.replace(/[&<>]/g, function(m) { return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m];})}</p><div class="timestamp">${ts}</div>`;
-            }
-            chatBody.insertBefore(div, typingDiv);
-            chatBody.scrollTop = chatBody.scrollHeight;
-        }
-    }
-
     function addSystemNotice(text) {
         const div = document.createElement('div');
         div.className = 'system-notice';
@@ -793,10 +869,30 @@
         chatBody.insertBefore(div, typingDiv);
         chatBody.scrollTop = chatBody.scrollHeight;
     }
-
-    function showTyping() { typingDiv.classList.add('active'); chatBody.scrollTop = chatBody.scrollHeight; }
-    function hideTyping() { typingDiv.classList.remove('active'); }
-
+    
+    function showTyping() {
+        typingDiv.classList.add('active');
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+    
+    function hideTyping() {
+        typingDiv.classList.remove('active');
+    }
+    
+    function simulateAgentRequest() {
+        if (waitingForAgent || liveMode) return;
+        waitingForAgent = true;
+        addSystemNotice("⏳ Requesting a live agent — please hold...");
+        
+        setTimeout(() => {
+            if (waitingForAgent) {
+                waitingForAgent = false;
+                addMessage("😔 No agents are available right now. Please leave your details and we'll follow up shortly.", 'agent');
+                showDetailsForm();
+            }
+        }, 3000);
+    }
+    
     function showDetailsForm() {
         if (awaitingDetails) return;
         awaitingDetails = true;
@@ -812,159 +908,72 @@
         `;
         chatBody.insertBefore(formDiv, typingDiv);
         chatBody.scrollTop = chatBody.scrollHeight;
-
+        
         document.getElementById('df_submit').addEventListener('click', () => {
             const name = document.getElementById('df_name').value.trim();
             const email = document.getElementById('df_email').value.trim();
-            const msg = document.getElementById('df_msg').value.trim();
             if (!name || !email) {
                 if (!name) document.getElementById('df_name').style.borderColor = '#EF4444';
                 if (!email) document.getElementById('df_email').style.borderColor = '#EF4444';
                 return;
             }
-            userName = name;
             formDiv.remove();
             awaitingDetails = false;
-            addSystemNotice(`📨 Thanks ${name}, we’ll contact you at ${email}.`);
-            addMessage("Your details have been shared with our team. We’ll reach out as soon as possible. Meanwhile, feel free to ask me anything!", 'agent');
+            addSystemNotice(`📨 Thanks ${name}, we'll contact you at ${email}.`);
+            addMessage("Your details have been shared with our team. We'll reach out as soon as possible. Meanwhile, feel free to ask me anything!", 'agent');
         });
     }
-
-    function resetToBot() {
-        liveMode = false;
-        waitingForAgent = false;
-        connectedAgentName = null;
-        awaitingDetails = false;
-        setHeaderBot();
-    }
-
-    function requestAgentTransfer() {
-        if (waitingForAgent || liveMode) return;
-        waitingForAgent = true;
-        setHeaderWaiting();
-        addSystemNotice("⏳ Requesting a live agent — please hold...");
-        bc.postMessage({ type: 'TRANSFER_REQUEST', userId, userName, lastMessage: 'user requested agent' });
-        setTimeout(() => {
-            if (waitingForAgent) {
-                waitingForAgent = false;
-                setHeaderBot();
-                addMessage("😔 No agents are available right now. Please leave your details and we'll follow up shortly.", 'agent');
-                showDetailsForm();
-            }
-        }, 10000);
-    }
-
-    const sessionId = 'web_signature_pink_' + Date.now();
-    async function getAIResponse(userMsg) {
-        if (DEMO_MODE) {
-            await new Promise(r => setTimeout(r, 700));
-            return "**Gemini AI Demo**  \n*Here is a formatted response:*  \n\n- Bullet point one: helpful information.\n- Second bullet: structured nicely.\n\nYou can ask about our integrations, pricing, or support policies. Feel free to type **\"human\"** to talk to a live agent!";
-        }
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-            body: JSON.stringify({ message: userMsg, session_id: sessionId })
-        });
-        if (!response.ok) throw new Error(`API error ${response.status}`);
-        const data = await response.json();
-        if (data.error) throw new Error(data.error);
-        return data.response || data.answer || "I'm not sure, but I'm learning!";
-    }
-
+    
     async function handleUserMessage(text) {
         if (awaitingDetails) return;
         addMessage(text, 'user');
-        if (liveMode) {
-            bc.postMessage({ type: 'USER_MSG', userId, userName, text, time: new Date().toLocaleTimeString() });
-            return;
-        }
-        if (waitingForAgent) {
-            addMessage("⏳ Still connecting you to an agent, please hold on...", 'agent');
-            return;
-        }
+        
         if (wantsLiveAgent(text)) {
-            requestAgentTransfer();
+            simulateAgentRequest();
             return;
         }
+        
         showTyping();
-        try {
-            const aiReply = await getAIResponse(text);
+        
+        // Simulate network delay for realism
+        setTimeout(() => {
             hideTyping();
-            addMessage(aiReply, 'agent', false); // will be auto-formatted into paragraphs/lists
-        } catch (err) {
-            hideTyping();
-            addMessage(`⚠️ AI service error: ${err.message || 'connection issue'}. Please try again.`, 'agent');
-        }
+            const response = getGeminiResponse(text);
+            addMessage(response, 'agent');
+        }, 800 + Math.random() * 500);
     }
-
-    // BroadcastChannel events (agent panel communication)
-    bc.onmessage = (ev) => {
-        const msg = ev.data;
-        if (msg.type === 'AGENT_ONLINE') agentOnlineGlobal = true;
-        if (msg.type === 'AGENT_OFFLINE') agentOnlineGlobal = false;
-
-        if (msg.type === 'AGENT_ACCEPT' && msg.userId === userId) {
-            waitingForAgent = false;
-            liveMode = true;
-            connectedAgentName = msg.agentName || 'Support';
-            setHeaderAgent(connectedAgentName);
-            addSystemNotice(`✅ Connected to live agent: ${connectedAgentName}`);
-            addMessage(`Hi! I'm ${connectedAgentName}. How can I assist you today?`, 'agent');
-            modal.classList.add('active');
-        }
-        if (msg.type === 'AGENT_DENY' && msg.userId === userId) {
-            waitingForAgent = false;
-            setHeaderBot();
-            addMessage("😔 No agents are available right now. Leave your details and we'll follow up with you.", 'agent');
-            showDetailsForm();
-        }
-        if (msg.type === 'AGENT_MSG' && msg.userId === userId && liveMode) {
-            addMessage(msg.text, 'agent');
-            modal.classList.add('active');
-        }
-        if (msg.type === 'AGENT_EXIT' && msg.userId === userId) {
-            resetToBot();
-            addSystemNotice('🔄 Agent ended the session. You are now chatting with Lora (AI).');
-            addMessage("I'm back! Need any further help?", 'agent');
-        }
-    };
-
+    
+    // Event handlers
     aiBtn.addEventListener('click', () => {
         modal.classList.add('active');
         notificationBadge.style.display = 'none';
         setTimeout(() => chatInput.focus(), 200);
     });
-    closeModal.addEventListener('click', () => {
+    
+    closeBtn.addEventListener('click', () => {
         modal.classList.remove('active');
-        if (liveMode || waitingForAgent) {
-            bc.postMessage({ type: 'USER_DISCONNECT', userId });
-            resetToBot();
-        }
     });
+    
     document.addEventListener('click', (e) => {
         if (!modal.contains(e.target) && !aiBtn.contains(e.target) && modal.classList.contains('active')) {
             modal.classList.remove('active');
         }
     });
-
-    sendBtn.addEventListener('click', () => { const val = chatInput.value.trim(); if (val) { chatInput.value = ''; handleUserMessage(val); } });
-    chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); } });
-
-    document.querySelectorAll('.faq-answer').forEach(el => {
-        el.addEventListener('click', (e) => {
-            if (e.target === el || el.contains(e.target)) {
-                const text = el.innerText.trim().slice(0, 80);
-                if (text.length > 5) {
-                    modal.classList.add('active');
-                    notificationBadge.style.display = 'none';
-                    chatInput.value = `Tell me about: ${text}`;
-                    chatInput.focus();
-                }
-            }
-        });
+    
+    sendBtn.addEventListener('click', () => {
+        const val = chatInput.value.trim();
+        if (val) {
+            chatInput.value = '';
+            handleUserMessage(val);
+        }
     });
-
-    setTimeout(() => { notificationBadge.style.display = 'none'; }, 5000);
-</script>
-</body>
-</html>
+    
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendBtn.click();
+        }
+    });
+    
+    // FAQ click to chat
+    document.querySelectorAll('.faq-item').forEach(item =>
