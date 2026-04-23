@@ -309,18 +309,47 @@
             background: #FFFCFE;
         }
 
-        /* message bubbles — using custom pinks */
+        /* message bubbles — using custom pinks + enhanced formatting for paragraphs */
         .message {
-            max-width: 82%;
-            padding: 12px 16px;
+            max-width: 88%;
+            padding: 12px 18px;
             border-radius: 22px;
             font-size: 14px;
-            line-height: 1.45;
+            line-height: 1.55;
             box-shadow: 0 1px 1px rgba(0,0,0,0.02);
+            word-wrap: break-word;
+        }
+
+        /* improved styling for structured text inside messages */
+        .message p {
+            margin-bottom: 12px;
+        }
+        .message p:last-child {
+            margin-bottom: 0;
+        }
+        .message ul, .message ol {
+            margin: 8px 0 8px 20px;
+        }
+        .message li {
+            margin-bottom: 4px;
+        }
+        .message strong, .message b {
+            color: #5E185B;
+            font-weight: 600;
+        }
+        .message em {
+            font-style: italic;
+        }
+        .message code {
+            background: rgba(164, 53, 143, 0.1);
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 0.85em;
         }
 
         .agent-message {
-            background: #FCE4F5;  /* lightest pink kept */
+            background: #FCE4F5;  /* lightest pink */
             color: #2D1B2E;
             align-self: flex-start;
             border-bottom-left-radius: 6px;
@@ -336,7 +365,7 @@
         .timestamp {
             font-size: 10px;
             color: #9B6B97;
-            margin-top: 6px;
+            margin-top: 8px;
             text-align: right;
         }
 
@@ -588,7 +617,7 @@
 </div>
 
 <script>
-    // ---------- LIGHT MODE CHAT WITH SIGNATURE PINK PALETTE ----------
+    // ---------- LIGHT MODE CHAT WITH FORMATTED PARAGRAPHS FOR GEMINI RESPONSES ----------
     const API_URL = 'https://faq-two-murex.vercel.app/api/chat';
     const DEMO_MODE = false;
 
@@ -633,13 +662,129 @@
     function setHeaderWaiting() { chatAgentNameSpan.innerText = 'Lora'; chatAgentStatusSpan.innerText = 'Connecting to agent...'; statusDotSpan.style.background = '#F59E0B'; }
     function setHeaderAgent(name) { chatAgentNameSpan.innerText = name || 'Live Agent'; chatAgentStatusSpan.innerText = 'Live Agent'; statusDotSpan.style.background = '#A4358F'; }
 
-    function addMessage(html, sender) {
+    /**
+     * Convert plain text response from Gemini into HTML with paragraphs, lists & bold formatting.
+     * Handles markdown-like line breaks and structured content without external libs.
+     */
+    function formatAIResponseToHTML(text) {
+        if (!text) return '<p>✨ No response received.</p>';
+        
+        // Normalize line endings and trim
+        let content = text.trim();
+        
+        // Step 1: Replace markdown-like bold **text** or __text__ with <strong>
+        content = content.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        content = content.replace(/__(.+?)__/g, '<strong>$1</strong>');
+        
+        // Step 2: Replace markdown-like italic *text* or _text_ (but not inside links)
+        content = content.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+        content = content.replace(/_([^_\n]+?)_/g, '<em>$1</em>');
+        
+        // Step 3: Handle unordered lists: lines starting with - or * followed by space
+        const lines = content.split(/\r?\n/);
+        let inList = false;
+        let htmlParts = [];
+        
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+            // Detect list item: starts with *, -, • optionally spaces
+            const listMatch = line.match(/^[\s]*([\*\-\•])\s+(.+)$/);
+            if (listMatch) {
+                if (!inList) {
+                    htmlParts.push('<ul>');
+                    inList = true;
+                }
+                htmlParts.push(`<li>${listMatch[2]}</li>`);
+                continue;
+            } 
+            
+            // Close list if we were in one and line not list item
+            if (inList) {
+                htmlParts.push('</ul>');
+                inList = false;
+            }
+            
+            // Detect numbered list: starts with 1. 2. etc
+            const numMatch = line.match(/^[\s]*(\d+)\.\s+(.+)$/);
+            if (numMatch) {
+                if (!inList) {
+                    htmlParts.push('<ol>');
+                    inList = true;
+                }
+                htmlParts.push(`<li>${numMatch[2]}</li>`);
+                continue;
+            }
+            
+            if (inList) {
+                htmlParts.push('</ul>'); // close previous list
+                inList = false;
+            }
+            
+            // Handle empty lines -> paragraph separator
+            if (line.trim() === '') {
+                // skip empty lines, they just separate blocks naturally
+                continue;
+            }
+            
+            // Normal text paragraph
+            let processedLine = line;
+            // inline code detection: `code`
+            processedLine = processedLine.replace(/`([^`]+)`/g, '<code>$1</code>');
+            htmlParts.push(`<p>${processedLine}</p>`);
+        }
+        
+        if (inList) htmlParts.push('</ul>');
+        
+        let result = htmlParts.join('');
+        if (!result) result = `<p>${content}</p>`;
+        
+        // Additional spacing improvements: ensure multiple <p>s have margin
+        return result;
+    }
+    
+    function addFormattedMessage(contentHtml, sender) {
         const div = document.createElement('div');
         div.classList.add('message', sender === 'user' ? 'user-message' : 'agent-message');
         const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        div.innerHTML = `${html}<div class="timestamp">${ts}</div>`;
+        // For safety, wrap contentHtml but we already built valid HTML structure for agent messages.
+        // For user messages we treat as simple text, but users may send formatted? No, plain.
+        if (sender === 'user') {
+            // escape user input to avoid injection
+            const safeText = contentHtml.replace(/[&<>]/g, function(m) {
+                if(m === '&') return '&amp;';
+                if(m === '<') return '&lt;';
+                if(m === '>') return '&gt;';
+                return m;
+            });
+            div.innerHTML = `<p>${safeText}</p><div class="timestamp">${ts}</div>`;
+        } else {
+            // AI response: fully formatted HTML blocks
+            div.innerHTML = `${contentHtml}<div class="timestamp">${ts}</div>`;
+        }
         chatBody.insertBefore(div, typingDiv);
         chatBody.scrollTop = chatBody.scrollHeight;
+    }
+    
+    // Override original addMessage to preserve formatting but keep compatibility with system messages
+    function addMessage(textOrHtml, sender, isHtml = false) {
+        if (sender === 'agent' && !isHtml) {
+            const formattedHtml = formatAIResponseToHTML(textOrHtml);
+            addFormattedMessage(formattedHtml, 'agent');
+        } else if (sender === 'user') {
+            addFormattedMessage(textOrHtml, 'user');
+        } else {
+            // fallback legacy usage: add raw message
+            const div = document.createElement('div');
+            div.classList.add('message', sender === 'user' ? 'user-message' : 'agent-message');
+            const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            if (sender === 'agent') {
+                div.innerHTML = `<p>${textOrHtml}</p><div class="timestamp">${ts}</div>`;
+            } else {
+                div.innerHTML = `<p>${textOrHtml.replace(/[&<>]/g, function(m) { return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m];})}</p><div class="timestamp">${ts}</div>`;
+            }
+            chatBody.insertBefore(div, typingDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
     }
 
     function addSystemNotice(text) {
@@ -710,18 +855,11 @@
         }, 10000);
     }
 
-    // Send message to Gemini (or fallback)
     const sessionId = 'web_signature_pink_' + Date.now();
     async function getAIResponse(userMsg) {
         if (DEMO_MODE) {
             await new Promise(r => setTimeout(r, 700));
-            const demoPool = [
-                "Thanks for your question! Lora here — you can find more details in our FAQ. Let me know if you need deeper help.",
-                "That’s interesting! Could you elaborate a bit? I’m here to assist with any technical or product queries.",
-                "Great question! Umbrella Labs focuses on AI-driven support tools. Feel free to ask about features or integrations.",
-                "I can help with that! Our AI is built on Gemini for accurate responses. Anything specific you'd like to know?"
-            ];
-            return demoPool[Math.floor(Math.random() * demoPool.length)];
+            return "**Gemini AI Demo**  \n*Here is a formatted response:*  \n\n- Bullet point one: helpful information.\n- Second bullet: structured nicely.\n\nYou can ask about our integrations, pricing, or support policies. Feel free to type **\"human\"** to talk to a live agent!";
         }
         const response = await fetch(API_URL, {
             method: 'POST',
@@ -753,7 +891,7 @@
         try {
             const aiReply = await getAIResponse(text);
             hideTyping();
-            addMessage(aiReply, 'agent');
+            addMessage(aiReply, 'agent', false); // will be auto-formatted into paragraphs/lists
         } catch (err) {
             hideTyping();
             addMessage(`⚠️ AI service error: ${err.message || 'connection issue'}. Please try again.`, 'agent');
@@ -792,7 +930,6 @@
         }
     };
 
-    // UI events
     aiBtn.addEventListener('click', () => {
         modal.classList.add('active');
         notificationBadge.style.display = 'none';
@@ -814,7 +951,6 @@
     sendBtn.addEventListener('click', () => { const val = chatInput.value.trim(); if (val) { chatInput.value = ''; handleUserMessage(val); } });
     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); } });
 
-    // FAQ quick fill
     document.querySelectorAll('.faq-answer').forEach(el => {
         el.addEventListener('click', (e) => {
             if (e.target === el || el.contains(e.target)) {
@@ -830,7 +966,6 @@
     });
 
     setTimeout(() => { notificationBadge.style.display = 'none'; }, 5000);
-    console.log('Signature pink light mode chat ready | Colors: #5E185B, #A4358F, #EBB2E6, #FCE4F5');
 </script>
 </body>
 </html>
