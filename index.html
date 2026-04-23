@@ -244,6 +244,9 @@
             background: #FEF7FC;
             padding: 18px 20px;
             border-bottom: 1px solid #F5D9F2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .agent-info {
@@ -286,18 +289,7 @@
             border-radius: 50%;
         }
 
-        .close-btn {
-            background: none;
-            border: none;
-            color: #A4358F;
-            font-size: 22px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .close-btn:hover {
-            color: #5E185B;
-        }
+        /* Close button removed - replaced by toggle behavior */
 
         .chat-body {
             flex: 1;
@@ -599,7 +591,7 @@
                 </div>
             </div>
         </div>
-        <button class="close-btn" id="closeChat"><i class="fas fa-times"></i></button>
+        <!-- CLOSE BUTTON REMOVED - chat toggles via icon only -->
     </div>
     <div class="chat-body" id="chatBody">
         <div class="message agent-message">
@@ -617,7 +609,10 @@
 </div>
 
 <script>
-    // ---------- LIGHT MODE CHAT WITH FORMATTED PARAGRAPHS FOR GEMINI RESPONSES ----------
+    // ---------- MODIFIED: Remove close button, toggle chat via FAB (chat icon) ----------
+    // Clicking chat icon now CLOSES chat if open, OPENS if closed.
+    // Also removed closeChat button references and adjusted modal open/close logic.
+    
     const API_URL = 'https://faq-eta-three.vercel.app/api/chat';
     const DEMO_MODE = false;
 
@@ -636,7 +631,6 @@
     // DOM elements
     const aiBtn = document.getElementById('aiAgentButton');
     const modal = document.getElementById('chatModal');
-    const closeModal = document.getElementById('closeChat');
     const chatBody = document.getElementById('chatBody');
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendMessage');
@@ -664,30 +658,21 @@
 
     /**
      * Convert plain text response from Gemini into HTML with paragraphs, lists & bold formatting.
-     * Handles markdown-like line breaks and structured content without external libs.
      */
     function formatAIResponseToHTML(text) {
         if (!text) return '<p>✨ No response received.</p>';
-        
-        // Normalize line endings and trim
         let content = text.trim();
-        
-        // Step 1: Replace markdown-like bold **text** or __text__ with <strong>
         content = content.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
         content = content.replace(/__(.+?)__/g, '<strong>$1</strong>');
-        
-        // Step 2: Replace markdown-like italic *text* or _text_ (but not inside links)
         content = content.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
         content = content.replace(/_([^_\n]+?)_/g, '<em>$1</em>');
         
-        // Step 3: Handle unordered lists: lines starting with - or * followed by space
         const lines = content.split(/\r?\n/);
         let inList = false;
         let htmlParts = [];
         
         for (let i = 0; i < lines.length; i++) {
             let line = lines[i];
-            // Detect list item: starts with *, -, • optionally spaces
             const listMatch = line.match(/^[\s]*([\*\-\•])\s+(.+)$/);
             if (listMatch) {
                 if (!inList) {
@@ -697,14 +682,10 @@
                 htmlParts.push(`<li>${listMatch[2]}</li>`);
                 continue;
             } 
-            
-            // Close list if we were in one and line not list item
             if (inList) {
                 htmlParts.push('</ul>');
                 inList = false;
             }
-            
-            // Detect numbered list: starts with 1. 2. etc
             const numMatch = line.match(/^[\s]*(\d+)\.\s+(.+)$/);
             if (numMatch) {
                 if (!inList) {
@@ -714,31 +695,18 @@
                 htmlParts.push(`<li>${numMatch[2]}</li>`);
                 continue;
             }
-            
             if (inList) {
-                htmlParts.push('</ul>'); // close previous list
+                htmlParts.push('</ul>');
                 inList = false;
             }
-            
-            // Handle empty lines -> paragraph separator
-            if (line.trim() === '') {
-                // skip empty lines, they just separate blocks naturally
-                continue;
-            }
-            
-            // Normal text paragraph
+            if (line.trim() === '') continue;
             let processedLine = line;
-            // inline code detection: `code`
             processedLine = processedLine.replace(/`([^`]+)`/g, '<code>$1</code>');
             htmlParts.push(`<p>${processedLine}</p>`);
         }
-        
         if (inList) htmlParts.push('</ul>');
-        
         let result = htmlParts.join('');
         if (!result) result = `<p>${content}</p>`;
-        
-        // Additional spacing improvements: ensure multiple <p>s have margin
         return result;
     }
     
@@ -746,10 +714,7 @@
         const div = document.createElement('div');
         div.classList.add('message', sender === 'user' ? 'user-message' : 'agent-message');
         const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        // For safety, wrap contentHtml but we already built valid HTML structure for agent messages.
-        // For user messages we treat as simple text, but users may send formatted? No, plain.
         if (sender === 'user') {
-            // escape user input to avoid injection
             const safeText = contentHtml.replace(/[&<>]/g, function(m) {
                 if(m === '&') return '&amp;';
                 if(m === '<') return '&lt;';
@@ -758,14 +723,12 @@
             });
             div.innerHTML = `<p>${safeText}</p><div class="timestamp">${ts}</div>`;
         } else {
-            // AI response: fully formatted HTML blocks
             div.innerHTML = `${contentHtml}<div class="timestamp">${ts}</div>`;
         }
         chatBody.insertBefore(div, typingDiv);
         chatBody.scrollTop = chatBody.scrollHeight;
     }
     
-    // Override original addMessage to preserve formatting but keep compatibility with system messages
     function addMessage(textOrHtml, sender, isHtml = false) {
         if (sender === 'agent' && !isHtml) {
             const formattedHtml = formatAIResponseToHTML(textOrHtml);
@@ -773,7 +736,6 @@
         } else if (sender === 'user') {
             addFormattedMessage(textOrHtml, 'user');
         } else {
-            // fallback legacy usage: add raw message
             const div = document.createElement('div');
             div.classList.add('message', sender === 'user' ? 'user-message' : 'agent-message');
             const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -891,14 +853,14 @@
         try {
             const aiReply = await getAIResponse(text);
             hideTyping();
-            addMessage(aiReply, 'agent', false); // will be auto-formatted into paragraphs/lists
+            addMessage(aiReply, 'agent', false);
         } catch (err) {
             hideTyping();
             addMessage(`⚠️ AI service error: ${err.message || 'connection issue'}. Please try again.`, 'agent');
         }
     }
 
-    // BroadcastChannel events (agent panel communication)
+    // BroadcastChannel events
     bc.onmessage = (ev) => {
         const msg = ev.data;
         if (msg.type === 'AGENT_ONLINE') agentOnlineGlobal = true;
@@ -930,21 +892,31 @@
         }
     };
 
+    // NEW TOGGLE BEHAVIOR: clicking chat icon toggles modal open/closed (removed close button)
     aiBtn.addEventListener('click', () => {
-        modal.classList.add('active');
-        notificationBadge.style.display = 'none';
-        setTimeout(() => chatInput.focus(), 200);
-    });
-    closeModal.addEventListener('click', () => {
-        modal.classList.remove('active');
-        if (liveMode || waitingForAgent) {
-            bc.postMessage({ type: 'USER_DISCONNECT', userId });
-            resetToBot();
+        if (modal.classList.contains('active')) {
+            modal.classList.remove('active');
+            // If in live or waiting mode, notify disconnect but do not reset on manual close? Preserve state as per original pattern.
+            // But to keep consistent: When user manually closes chat via icon, we disconnect from agent if live (similar to close button behavior)
+            if (liveMode || waitingForAgent) {
+                bc.postMessage({ type: 'USER_DISCONNECT', userId });
+                resetToBot();
+            }
+        } else {
+            modal.classList.add('active');
+            notificationBadge.style.display = 'none';
+            setTimeout(() => chatInput.focus(), 200);
         }
     });
+    
+    // Optional: Click outside to close (still a common UX pattern but we keep for friendliness)
     document.addEventListener('click', (e) => {
         if (!modal.contains(e.target) && !aiBtn.contains(e.target) && modal.classList.contains('active')) {
             modal.classList.remove('active');
+            if (liveMode || waitingForAgent) {
+                bc.postMessage({ type: 'USER_DISCONNECT', userId });
+                resetToBot();
+            }
         }
     });
 
